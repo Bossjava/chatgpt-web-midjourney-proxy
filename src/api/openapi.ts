@@ -178,7 +178,7 @@ export const getSystemMessage = (uuid?:number )=>{
     }
     if(  sysTem ) return sysTem;
     let model= gptConfigStore.myData.model?gptConfigStore.myData.model: "gpt-3.5-turbo";
-      const DEFAULT_SYSTEM_TEMPLATE = `You are ChatGPT, a large language model trained by OpenAI.
+      const DEFAULT_SYSTEM_TEMPLATE = `今年是2024年，龙年，You are ChatGPT, a large language model trained by OpenAI.
 Knowledge cutoff: ${KnowledgeCutOffDate[model]}
 Current model: ${model}
 Current time: ${ new Date().toLocaleString()}
