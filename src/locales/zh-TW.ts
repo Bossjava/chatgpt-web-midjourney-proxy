@@ -186,7 +186,7 @@ export default {
     "server": "服務端",
     "about": "關於",
     "model": "模型",
-    "sysname": "AI繪圖"
+    "sysname": "集智科技"
   },
   "mjtab": {
     "chat": "對話",

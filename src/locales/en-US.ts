@@ -190,7 +190,7 @@ export default {
     "server": "Server",
     "about": "About",
     "model": "Model",
-    "sysname": "AI Drawing"
+    "sysname": "Jizhi Technology"
   },
   "mjtab": {
     "chat": "Chat",
