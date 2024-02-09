@@ -192,7 +192,7 @@ export const subModel= async (opt: subModelType)=>{
     const model= opt.model?? ( gptConfigStore.myData.model?gptConfigStore.myData.model: "gpt-3.5-turbo");
     let max_tokens= gptConfigStore.myData.max_tokens;
     let temperature= 0.5;
-    let top_p= 1;
+    let top_p= 0.9;
     let presence_penalty= 0 , frequency_penalty=0;
     if(opt.uuid){
         const chatSet= new chatSetting( +opt.uuid);
