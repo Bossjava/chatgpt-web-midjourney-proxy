@@ -128,7 +128,7 @@ function handleImportButtonClick(): void {
 <template>
   <div class="p-4 space-y-5 min-h-[200px]">
     <div class="space-y-6">
-      <div class="flex items-center space-x-4">
+      
       <div
         class="flex items-center space-x-4"
         :class="isMobile && 'items-start'"
