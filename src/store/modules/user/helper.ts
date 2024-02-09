@@ -17,7 +17,7 @@ export function defaultSetting(): UserState {
     userInfo: {
       avatar: 'jzlogo.png',
       name:  t('mjset.sysname'),//'AI绘图',
-      description: 'Star on <a href="https://github.com/Dooy/chatgpt-web-midjourney-proxy" class="text-blue-500" target="_blank" >GitHub</a>',
+      description: '关注 <a href="https://jizhikeji-1318931282.cos.ap-nanjing.myqcloud.com/sudu.jpg" class="text-blue-500" target="_blank" >速读助手</a>',
     },
   }
 }
