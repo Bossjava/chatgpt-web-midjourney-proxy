@@ -1,8 +1,6 @@
-
-
 <script setup lang='ts'>
 import type { Ref } from 'vue'
-import { computed, onMounted, onUnmounted, ref,watch,h } from 'vue'
+import { computed, h, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { NAutoComplete, NButton, NInput, useDialog, useMessage,NAvatar } from 'naive-ui'
@@ -384,6 +382,35 @@ function handleDelete(index: number) {
   })
 }
 
+function handleEdit(index: number) {
+  if (loading.value)
+    return
+
+  const editedMessage = ref(dataSources.value[index].text.slice())
+
+  const inputNode = () => {
+    return h(NInput, {
+      'value': editedMessage.value,
+      'type': 'textarea',
+      'autosize': { minRows: 1, maxRows: 8 },
+      'showCount': true,
+      'onUpdate:value': (v: string) => {
+        editedMessage.value = v
+      },
+    })
+  }
+
+  dialog.warning({
+    title: t('common.edit'),
+    content: inputNode,
+    positiveText: t('common.yes'),
+    negativeText: t('common.no'),
+    onPositiveClick: () => {
+      updateChatSome(+uuid, index, { text: editedMessage.value })
+    },
+  })
+}
+
 function handleClear() {
   if (loading.value)
     return
@@ -454,7 +481,8 @@ const goUseGpts= async ( item: gptsType)=>{
     gptConfigStore.setMyData(saveObj); 
     if(chatStore.active){ //保存到对话框
         const  chatSet = new chatSetting( chatStore.active );
-        if( chatSet.findIndex()>-1 ) chatSet.save( saveObj )
+        //if( chatSet.findIndex()>-1 ) chatSet.save( saveObj )
+        chatSet.save( saveObj )
     }
     ms.success(t('mjchat.success2'));
     const gptUrl= `https://gpts.ddaiai.com/open/gptsapi/use`; 
@@ -523,7 +551,16 @@ watch(()=>homeStore.myData.act,(n)=>{
     if(n=='draw')  scrollToBottom();
     if(n=='scrollToBottom') scrollToBottom();
     if(n=='scrollToBottomIfAtBottom') scrollToBottomIfAtBottom();
-    if(n=='gpt.submit' || n=='gpt.resubmit'){ loading.value = true;}
+    if(n=='gpt.submit' || n=='gpt.resubmit'){ 
+      loading.value = true;
+      if(chatStore.active){ 
+        const  chatSet = new chatSetting( chatStore.active );
+        if( chatSet.findIndex()==-1 ) { //如果是空保存到对话框
+          chatSet.save( chatSet.getGptConfig() )
+          setTimeout( ()=>homeStore.setMyData({act:'saveChat'}),600) ;
+        }
+      }
+    }
     if(n=='stopLoading'){ loading.value = false;}
 });
 const st =ref({inputme:true});
@@ -575,10 +612,11 @@ const ychat = computed( ()=>{
                 :loading="item.loading"
                 @regenerate="onRegenerate(index)"
                 @delete="handleDelete(index)"
+                @edit="handleEdit(index)"
                 :chat="item"
                 :index="index"
               />
-              <Message  v-if="ychat.text"
+              <Message  v-if="ychat.text && !homeStore.myData.session.isCloseMdPreview"
               :key="dataSources.length" :inversion="true"
               :date-time="$t('mj.typing')"
               :chat="ychat"

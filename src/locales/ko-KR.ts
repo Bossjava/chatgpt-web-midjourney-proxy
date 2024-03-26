@@ -144,7 +144,7 @@ export default {
     "totalUsage": "총 구독 금액",
     "disableGpt4": "GPT4 비활성화됨",
     "setTextInfo": "OpenAI API 키 오류, 여기를 클릭하여 다시 시도",
-    
+
     "attr1": "첨부",
     "ulink": "원본 이미지 링크",
     "copyFail": "복사 실패",
@@ -170,7 +170,7 @@ export default {
 
     "wsrvClose": "닫기 wsrv",
     "wsrvOpen": "열기 wsrv",
-    
+
     "temperature": "랜덤성",
     "temperatureInfo": "(temperature) 값이 증가함에 따라 응답이 더 랜덤해집니다",
     "top_p": "상위 확률 샘플링",
@@ -180,7 +180,13 @@ export default {
     "frequency_penalty": "빈도 패널티",
     "frequency_penaltyInfo": "(frequency_penalty) 값이 증가함에 따라 반복된 단어를 줄이는 가능성이 높아집니다",
     "tts_voice": "TTS 음성 캐릭터",
-    "typing": "입력 중"
+    "typing": "입력 중",
+    "authErro": "인가 실패",
+    "authBt": "인가 액세스 암호를 다시 입력하십시오",
+    "micWhisper": "속삭임 음성 인식",
+    "micAsr": "즉시 인식",
+    "micRec": "녹음 시작, 말씀하세요! 2초 동안 소리가 없으면 자동으로 중지됩니다.",
+    "micRecEnd": "녹음이 종료되었습니다"
 
   },
   "mjset": {
@@ -270,5 +276,92 @@ export default {
     ,"add2more": "두 장 이상의 이미지를 추가하십시오."
     ,"no1m": "이미지 크기는 1M를 초과할 수 없습니다."
     ,"imgExt": "이미지는 jpg, gif, png, jpeg 형식만 지원됩니다."
-  }
+  },
+	draw: {
+		qualityList: {
+			general: "General",
+			clear: "Clear",
+			hd: "HD",
+			ultraHd: "Ultra HD",
+		},
+		styleList: {
+			cyberpunk: "Cyberpunk",
+			star: "Star",
+			anime: "Anime",
+			japaneseComicsManga: "Japanese Comics/Manga",
+			inkWashPaintingStyle: "Ink Wash Painting Style",
+			original: "Original",
+			landscape: "Landscape",
+			illustration: "Illustration",
+			manga: "Manga",
+			modernOrganic: "Modern Organic",
+			genesis: "Genesis",
+			posterstyle: "Poster Style",
+			surrealism: "Surrealism",
+			sketch: "Sketch",
+			realism: "Realism",
+			watercolorPainting: "Watercolor Painting",
+			cubism: "Cubism",
+			blackAndWhite: "Black and White",
+			fmPhotography: "Film Photography Style",
+			cinematic: "Cinematic",
+			clearFacialFeatures: "Clear Facial Features",
+		},
+		viewList: {
+			wideView: "Wide View",
+			birdView: "Bird's Eye View",
+			topView: "Top View",
+			upview: "Upview",
+			frontView: "Front View",
+			headshot: "Headshot",
+			ultrawideshot: "Ultrawide Shot",
+			mediumShot: "Medium Shot (MS)",
+			longShot: "Long Shot (LS)",
+			depthOfField: "Depth of Field (DOF)",
+		},
+		shotList: {
+			faceShot: "Face Shot (VCU)",
+			bigCloseUp: "Big Close-Up (BCU)",
+			closeUp: "Close-Up (CU)",
+			waistShot: "Waist Shot (WS)",
+			kneeShot: "Knee Shot (KS)",
+			fullLengthShot: "Full Length Shot (FLS)",
+			extraLongShot: "Extra Long Shot (ELS)",
+		},
+		stylesList: {
+			styleLow: "Style Low",
+			styleMed: "Style Medium",
+			styleHigh: "Style High",
+			styleVeryHigh: "Style Very High",
+		},
+		lightList: {
+			coldLight: "Cold Light",
+			warmLight: "Warm Light",
+			hardLighting: "Hard Lighting",
+			dramaticLight: "Dramatic Light",
+			reflectionLight: "Reflection Light",
+			mistyFoggy: "Misty/Foggy",
+			naturalLight: "Natural Light",
+			sunLight: "Sun Light",
+			moody: "Moody",
+		},
+		versionList: {
+			mjV6: "MJ V6",
+			mjV52: "MJ V5.2",
+			mjV51: "MJ V5.1",
+			nijiV6: "Niji V6",
+			nijiV5: "Niji V5",
+			nijiV4: "Niji V4",
+			nijiJourney: "Niji Journey",
+		},
+		botList: {
+			midjourneyBot: "Midjourney Bot",
+			nijiJourney: "Niji Journey",
+		},
+		dimensionsList: {
+			square: "Square (1:1)",
+			portrait: "Portrait (2:3)",
+			landscape: "Landscape (3:2)",
+		},
+	}
 }

@@ -8,7 +8,6 @@ import { isNumber, isObject } from "@/utils/is";
 import { t } from "@/locales";
 import { ChatMessage } from "gpt-tokenizer/esm/GptEncoding";
 import { chatSetting } from "./chat";
-
 //import {encode,  encodeChat}  from "gpt-tokenizer"
 //import {encode,  encodeChat} from "gpt-tokenizer/cjs/encoding/cl100k_base.js";
 //import { get_encoding } from '@dqbd/tiktoken'
@@ -20,6 +19,8 @@ export const KnowledgeCutOffDate: Record<string, string> = {
   "gpt-4-1106-preview": "2023-04",
   "gpt-4-0125-preview": "2023-04",
   "gpt-4-vision-preview": "2023-04",
+  "claude-3-opus-20240229": "2023-08",
+  "claude-3-sonnet-20240229": "2023-08",
 };
 
 const getUrl=(url:string)=>{
@@ -53,6 +54,24 @@ export const gptFetch=(url:string,data?:any,opt2?:any )=>{
         .catch(e=>reject(e))
     })
 
+}
+
+export const regCookie= async (n:string )=>{
+    if( n=='' ) return ;
+    //mlog('regCookie:', n)
+    let headers= {'Content-Type':'application/json', 'x-vtoken':n  }
+    //headers={...headers,...getHeaderAuthorization()}
+    let opt:RequestInit ={method:'GET'};
+    opt.headers= headers ;
+    const ck= await  new Promise<any>((resolve, reject) => {
+    fetch('/api/reg', opt )
+        .then(d=>d.json().then(d=> resolve(d))
+        .catch(e=>reject(e)))
+        .catch(e=>reject(e))
+     });
+    homeStore.setMyData({ctoken:ck.ctoken })
+     
+    mlog('regCookie:',   ck,n  )
 }
  // 前端直传 cloudflare r2
 function uploadR2(file: File) {
@@ -89,38 +108,79 @@ function uploadR2(file: File) {
 	});
 }
 
-export const GptUploader =   ( url:string, FormData:FormData )=>{
-	 if(homeStore.myData.session.isUploadR2){
-			const file = FormData.get('file') as File;
-			return uploadR2(file);
-	 }
+export const GptUploader =   ( _url :string, FormData:FormData )=>{
 
-    // if(gptServerStore.myData.OPENAI_API_BASE_URL){
-    //     return `${ gptServerStore.myData.OPENAI_API_BASE_URL}${url}`;
-    // }
-    url= gptServerStore.myData.UPLOADER_URL? gptServerStore.myData.UPLOADER_URL :  gptGetUrl( url );
+    //R2上传
+    const upLoaderR2= ()=>{
+        const file = FormData.get('file') as File;
+		return uploadR2(file);
+    }
+
+    //执行上传
+    const uploadNomalDo = (url:string, headers:any)=>{
+        return new Promise<any>((resolve, reject) => {
+                axios.post( url , FormData, {
+                headers
+            }).then(response =>  resolve(response.data )
+            ).catch(error =>reject(error)  );
+        })
+    }
+
+    //除R2外默认流程
+    const uploadNomal= (url:string)=>{ 
+        url= gptServerStore.myData.UPLOADER_URL? gptServerStore.myData.UPLOADER_URL :  gptGetUrl( url );
+        let headers=   {'Content-Type': 'multipart/form-data' } 
+        if(gptServerStore.myData.OPENAI_API_BASE_URL && url.indexOf(gptServerStore.myData.OPENAI_API_BASE_URL)>-1  ) {
+            headers={...headers,...getHeaderAuthorization()}
+            
+        }else{
+            const authStore = useAuthStore()
+            if( authStore.token ) {
+                const  header2={ 'x-ptoken':  authStore.token };
+                headers= {...headers, ...header2}
+            }
+        }
+        if( homeStore.myData.vtoken ){
+            const  vtokenh={ 'x-vtoken':  homeStore.myData.vtoken };
+             headers= {...headers, ...vtokenh}
+        }
+        return  uploadNomalDo(url,headers );
+        
+    }
+
+    //处理上传流程 
+    const uploadType=   ( (homeStore.myData.session.uploadType??'') as string).toLocaleLowerCase() ;
     let headers=   {'Content-Type': 'multipart/form-data' }
-    //
-
-
-
-    if(gptServerStore.myData.OPENAI_API_BASE_URL && url.indexOf(gptServerStore.myData.OPENAI_API_BASE_URL)>-1  ) {
-        headers={...headers,...getHeaderAuthorization()}
-        //mlog("headers", headers );
-    }else{
+    
+    //R2
+    if(uploadType=='r2' ){
+        return upLoaderR2(); 
+    //容器
+    }else if( uploadType=='container' ) { 
          const authStore = useAuthStore()
         if( authStore.token ) {
             const  header2={ 'x-ptoken':  authStore.token };
             headers= {...headers, ...header2}
         }
-    }
-    return new Promise<any>((resolve, reject) => {
-            axios.post( url , FormData, {
-            headers
-        }).then(response =>  resolve(response.data )
-        ).catch(error =>reject(error)  );
-    })
+        let url= `/openapi${_url}`
+        return  uploadNomalDo(url,headers );
 
+    //前端API
+    }else if( uploadType=='api' ) { 
+        headers={...headers,...getHeaderAuthorization()}
+        let url= `${ gptServerStore.myData.OPENAI_API_BASE_URL}${_url}`
+        return  uploadNomalDo(url,headers );
+    
+    //自定义链接
+    }else if( uploadType=='myurl' ) { 
+        return  uploadNomalDo(_url,headers );
+    }
+
+    //默认上传流程
+    if(homeStore.myData.session.isUploadR2){
+    return upLoaderR2();
+    }
+    return uploadNomal( _url);
 }
 
 export const whisperUpload = ( FormData:FormData )=>{
@@ -168,14 +228,25 @@ interface subModelType{
     uuid?:string|number
 }
 function getHeaderAuthorization(){
+    let headers={}
+    if( homeStore.myData.vtoken ){
+        const  vtokenh={ 'x-vtoken':  homeStore.myData.vtoken ,'x-ctoken':  homeStore.myData.ctoken};
+        headers= {...headers, ...vtokenh}
+    }
     if(!gptServerStore.myData.OPENAI_API_KEY){
         const authStore = useAuthStore()
-        if( authStore.token ) return { 'x-ptoken':  authStore.token };
-        return {}
+        if( authStore.token ) {
+            const bmi= { 'x-ptoken':  authStore.token };
+            headers= {...headers, ...bmi }
+            return headers;
+        }
+        return headers
     }
-    return {
+    const bmi={
         'Authorization': 'Bearer ' +gptServerStore.myData.OPENAI_API_KEY
     }
+    headers= {...headers, ...bmi }
+    return headers
 }
 
 export const getSystemMessage = (uuid?:number )=>{
@@ -187,7 +258,9 @@ export const getSystemMessage = (uuid?:number )=>{
     }
     if(  sysTem ) return sysTem;
     let model= gptConfigStore.myData.model?gptConfigStore.myData.model: "gpt-3.5-turbo";
-      const DEFAULT_SYSTEM_TEMPLATE = `今年是2024年，龙年，You are ChatGPT, a large language model trained by OpenAI.
+    let producer= 'You are ChatGPT, a large language model trained by OpenAI.'
+    if(model.includes('claude-3')) producer=  'You are Claude, a large language model trained by Anthropic.';
+      const DEFAULT_SYSTEM_TEMPLATE = `${producer}
 Knowledge cutoff: ${KnowledgeCutOffDate[model]}
 Current model: ${model}
 Current time: ${ new Date().toLocaleString()}
@@ -201,7 +274,7 @@ export const subModel= async (opt: subModelType)=>{
     const model= opt.model?? ( gptConfigStore.myData.model?gptConfigStore.myData.model: "gpt-3.5-turbo");
     let max_tokens= gptConfigStore.myData.max_tokens;
     let temperature= 0.5;
-    let top_p= 0.9;
+    let top_p= 1;
     let presence_penalty= 0 , frequency_penalty=0;
     if(opt.uuid){
         const chatSet= new chatSetting( +opt.uuid);
@@ -426,6 +499,10 @@ const getModelMax=( model:string )=>{
         return 128; 
     }else if( model.indexOf('gpt-4')>-1  ){  
         max=8;
+    }else if( model.toLowerCase().includes('claude-3') ){
+        //options.maxModelTokens = 120*1024;
+        //options.maxResponseTokens = 4096
+        return 120;
     }
 
     return max;
